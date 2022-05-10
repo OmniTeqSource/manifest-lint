@@ -69,7 +69,7 @@ def check_file(config: LintConfig, filename: str):
         if not settings.allow_multiple:
             return ManifestError.multiple(filename)
         else:
-            if len(set([d["kind"] for d in data])) != 1 and len(set([d["apiVersion"] for d in data])) != 1:
+            if len(set([d["kind"] for d in data])) != 1 or len(set([d["apiVersion"] for d in data])) != 1:
                 return ManifestError.mulitple_same(filename)
 
     # taking first manifest as filename
