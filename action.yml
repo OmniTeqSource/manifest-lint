@@ -1,0 +1,13 @@
+# action.yml
+name: "Manifest Lint"
+description: "Enforces manifest naming for a flux git repository"
+inputs:
+  directory:
+    description: "Directory to run on"
+    required: true
+    default: ""
+runs:
+  using: "docker"
+  image: "Dockerfile"
+  args:
+    - ${{ inputs.directory }}
