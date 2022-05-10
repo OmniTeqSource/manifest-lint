@@ -1,0 +1,7 @@
+---
+kind: Pod
+api: v1
+metadata:
+  name: another
+  namespace: thing
+spec: {}

@@ -1,0 +1,7 @@
+# manifest-lint: skip-namespace
+---
+kind: Pod
+api: v1
+metadata:
+  name: something
+spec: {}
