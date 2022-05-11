@@ -30,7 +30,7 @@ class LintSettings:
         return self._skip or self._skip_name
 
     @property
-    def allow_multipe(self):
+    def allow_multiple(self):
         return self._allow_multiple
 
 
@@ -50,11 +50,11 @@ class LintConfig:
                        skip_namespace=False,
                        skip_name=False,
                        ignore=False, **_):
-        allow_multiple = self._kwargs.get("allow_multiple", allow_multiple)
-        skip = self._kwargs.get("skip", skip)
-        skip_namespace = self._kwargs.get("skip_namespace", skip_namespace)
-        skip_name = self._kwargs.get("skip_name", skip_name)
-        ignore = self._kwargs.get("ignore", ignore)
+        allow_multiple = self._kwargs.get("allow_multiple") or allow_multiple
+        skip = self._kwargs.get("skip") or skip
+        skip_namespace = self._kwargs.get("skip_namespace"), skip_namespace
+        skip_name = self._kwargs.get("skip_name") or skip_name
+        ignore = self._kwargs.get("ignore") or ignore
         return LintSettings(allow_multiple, skip, skip_namespace, skip_name, ignore)
 
     def __call__(self,  raw: list[str]):
