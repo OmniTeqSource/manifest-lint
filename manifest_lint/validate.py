@@ -7,7 +7,7 @@ from .exceptions import ManifestError
 
 
 KEBAB_PATTERN = re.compile(r'(?<!^)(?=[A-Z])')
-FNAME_PATTERN = re.compile(r'^[a-z]+(-[a-z0-9]+){0,4}.yaml$')
+FNAME_PATTERN = re.compile(r'^[a-z]+(-[a-z0-9]+)*.yaml$')
 
 
 def lstrip(s, t):

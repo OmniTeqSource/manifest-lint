@@ -6,4 +6,4 @@ WORKDIR /app
 
 COPY manifest_lint /app/manifest_lint
 
-ENTRYPOINT [ "python", "-m", "manifest_lint", ]
+ENTRYPOINT [ "python", "-m", "manifest_lint" ]

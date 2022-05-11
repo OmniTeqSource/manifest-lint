@@ -36,7 +36,7 @@ class ManifestError:
     @staticmethod
     def pattern(filename: str):
         ManifestError.err(
-            filename, "YAML filename should follow pattern `[a-z]+(-[a-z0-9]){0,2}.yaml`")
+            filename, "YAML filename should follow pattern `[a-z]+(-[a-z0-9])+.yaml`")
 
     @staticmethod
     def display():
