@@ -6,8 +6,35 @@ inputs:
     description: "Directory to run on"
     required: true
     default: ""
+  skipNamespace:
+    description: "Global skip namespace validation"
+    required: false
+    default: "false"
+  skipName:
+    description: "Global skip name validation"
+    required: false
+    default: "false"
+  skip:
+    description: "Global skip namespace and name validation"
+    required: false
+    default: "false"
+  ignore:
+    description: "Ignore all validation"
+    required: false
+    default: "false"
+  allowMultiple:
+    description: "Allow multiple manifests per file"
+    required: false
+    default: "false"
 runs:
   using: "docker"
   image: "Dockerfile"
   args:
+    - --root-dir
     - ${{ inputs.directory }}
+    - --skip-namespace-gh-action=${{ inputs.skipNamespace }}
+    - --skip-name-gh-action=${{ inputs.skipNamespace }}
+    - --skip-name-gh-action=${{ inputs.skipName }}
+    - --skip-gh-action=${{ inputs.skip }}
+    - --ignore-gh-action=${{ inputs.ignore }}
+    - --allow-multiple-gh-action=${{ inputs.allowMultiple }}

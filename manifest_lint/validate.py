@@ -7,44 +7,87 @@ from .exceptions import ManifestError
 
 
 KEBAB_PATTERN = re.compile(r'(?<!^)(?=[A-Z])')
-FNAME_PATTERN = re.compile(r'^[a-z]+(-[a-z0-9]+){0,2}.yaml$')
+FNAME_PATTERN = re.compile(r'^[a-z]+(-[a-z0-9]+){0,4}.yaml$')
 
 
-def validate_manifest(settings: LintSettings, filename: str, kind="", metadata={}, apiVersion="", **_):
+def lstrip(s, t):
+    """lstrip exactly"""
+    return s[len(t):]
+
+
+class ManifestParser:
+    def __init__(self, raw: dict):
+        self._kind = raw["kind"]
+        self._apiVersion = raw["apiVersion"]
+        self._metadata = raw.get("metadata", {})
+
+    @property
+    def kind_kebab(self):
+        if self.is_flux and self.is_flux_kustomization:
+            return "kustomization-flux"
+        return KEBAB_PATTERN.sub('-', self._kind).lower()
+
+    @property
+    def is_flux(self):
+        return "fluxcd.io" in self._apiVersion
+
+    @property
+    def is_namespace(self):
+        return self._kind == "Namespace"
+
+    @property
+    def is_kustomization(self):
+        return self._kind == "Kustomization" and not self.is_flux
+
+    @property
+    def is_flux_kustomization(self):
+        return self._kind == "Kustomization" and self.is_flux
+
+    @property
+    def name(self):
+        return self._metadata.get("name")
+
+    @property
+    def namespace(self):
+        return self._metadata.get("namespace")
+
+    @property
+    def should_have_namespace(self):
+        return not (self.is_namespace or self.is_kustomization or self.is_flux_kustomization)
+
+    @property
+    def should_have_name(self):
+        return not (self.is_namespace or self.is_kustomization or self.is_flux_kustomization)
+
+
+def validate_manifest(settings: LintSettings, filename: str, raw: dict):
     """Validates manifest based on naming structure"""
-    kind_kebab = KEBAB_PATTERN.sub('-', kind).lower()
-    name = os.path.basename(filename).rstrip(".yaml").rstrip(".yml").lower()
-    is_flux = "fluxcd.io" in apiVersion
 
-    if kind_kebab == "kustomization" and is_flux:
-        kind_kebab = "kustomization-flux"
-
-    is_self_named = (kind == "Namespace") or (
-        kind == "Kustomization" and not is_flux)
-
-    manifest_name = metadata["name"]
-    manifest_namespace = metadata.get("namespace")
+    name = os.path.basename(filename).replace(
+        ".yaml", "").replace(".yml", "").lower()
+    manifest = ManifestParser(raw)
 
     # Match Kind
-    if not name.startswith(kind_kebab):
+    if not name.startswith(manifest.kind_kebab):
         return ManifestError.leading(filename)
     else:
-        name = name.lstrip(kind_kebab)
+        name = lstrip(name, manifest.kind_kebab)
 
     # Match namespace
     if name.startswith("-"):
-        name = name.lstrip("-")
+        name = lstrip(name, "-")
 
-    if not is_self_named and manifest_namespace and not settings.skip_namespace:
-        if not name.startswith(manifest_namespace):
+    if manifest.should_have_namespace and not settings.skip_namespace:
+        if manifest.namespace is None or not name.startswith(manifest.namespace):
             return ManifestError.no_namespace(filename)
 
-        name = name.lstrip(manifest_namespace)
+        name = lstrip(name, manifest.namespace)
         if name.startswith("-"):
-            name = name.lstrip("-")
+            name = lstrip(name, "-")
     # Match name
-    if not is_self_named and not name.startswith(manifest_name) and not settings.skip_name:
-        return ManifestError.no_name(filename)
+    if manifest.should_have_name and not settings.skip_name:
+        if manifest.name is None or not name.startswith(manifest.name):
+            return ManifestError.no_name(filename)
 
 
 def check_file(config: LintConfig, filename: str):
@@ -73,16 +116,19 @@ def check_file(config: LintConfig, filename: str):
                 return ManifestError.mulitple_same(filename)
 
     # taking first manifest as filename
-    validate_manifest(settings, filename, **data[0])
+    validate_manifest(settings, filename, data[0])
 
 
-def enforce(root: str):
+def enforce(root_dir: str, **kwargs):
     """Enforces a directory"""
-    config = LintConfig()
-    for (dirpath, _, filenames) in os.walk(root):
+    config = LintConfig(**kwargs)
+    for (dirpath, _, filenames) in os.walk(root_dir):
         for filename in filenames:
             if filename.endswith(('.yml', '.yaml')):
                 if FNAME_PATTERN.match(filename) is None:
                     ManifestError.pattern(filename)
                 filename = os.path.join(dirpath, filename)
-                check_file(config, filename)
+                try:
+                    check_file(config, filename)
+                except Exception as e:
+                    ManifestError.err(filename, str(e))

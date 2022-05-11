@@ -35,11 +35,14 @@ class LintSettings:
 
 
 class LintConfig:
-    def __init__(self):
+    def __init__(self, **kwargs):
+        """Kwargs accepts global flags"""
         self.manifest_line_pattern = re.compile(r'\#\s*manifest-lint:\s*')
         self.pre_manifest_line_pattern = re.compile(
             r'.*(?=\#\s*manifest-lint:)')
         self.csv_pattern = re.compile(r'(.+?)(?:,\s*|$)')
+
+        self._kwargs = kwargs
 
     def _init_settings(self,
                        allow_multiple=False,
@@ -47,6 +50,11 @@ class LintConfig:
                        skip_namespace=False,
                        skip_name=False,
                        ignore=False, **_):
+        allow_multiple = self._kwargs.get("allow_multiple", allow_multiple)
+        skip = self._kwargs.get("skip", skip)
+        skip_namespace = self._kwargs.get("skip_namespace", skip_namespace)
+        skip_name = self._kwargs.get("skip_name", skip_name)
+        ignore = self._kwargs.get("ignore", ignore)
         return LintSettings(allow_multiple, skip, skip_namespace, skip_name, ignore)
 
     def __call__(self,  raw: list[str]):
