@@ -7,7 +7,7 @@ from .exceptions import ManifestError
 
 
 KEBAB_PATTERN = re.compile(r'(?<!^)(?=[A-Z])')
-FNAME_PATTERN = re.compile(r'^[a-z]+(-[a-z0-9]+)*.yaml$')
+FNAME_PATTERN = re.compile(r'^[a-z]+(-[a-z0-9]+)*.(yaml|yml)$')
 
 
 def lstrip(s, t):
@@ -63,6 +63,9 @@ class ManifestParser:
 def validate_manifest(settings: LintSettings, filename: str, raw: dict):
     """Validates manifest based on naming structure"""
 
+    if FNAME_PATTERN.match(os.path.basename(filename)) is None:
+        ManifestError.pattern(filename)
+
     name = os.path.basename(filename).replace(
         ".yaml", "").replace(".yml", "").lower()
     manifest = ManifestParser(raw)
@@ -97,7 +100,6 @@ def check_file(config: LintConfig, filename: str):
         settings = config(raw)
         f.seek(0)
         raw = f.read()
-
     if settings.ignore:
         return
     try:
@@ -129,8 +131,6 @@ def enforce(root_dir: str, **kwargs):
 
         for filename in filenames:
             if filename.endswith(('.yml', '.yaml')):
-                if FNAME_PATTERN.match(filename) is None:
-                    ManifestError.pattern(filename)
                 filename = os.path.join(dirpath, filename)
                 try:
                     check_file(config, filename)
