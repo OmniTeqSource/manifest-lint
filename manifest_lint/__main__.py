@@ -38,3 +38,4 @@ if __name__ == "__main__":
         "allow_multiple": args.allow_multiple or (args.allow_multiple_gh_action.lower() == "true"),
     })
     ManifestError.display()
+    ManifestError.exit()

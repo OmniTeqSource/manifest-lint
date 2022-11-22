@@ -7,6 +7,9 @@ dependencies = [
   "PyYAML >= 5.4.1",
 ]
 description = "Runs linting on flux manifests to ensure naming style"
+dynamic = ["version"]
 name = "manifest_lint"
 requires-python = ">=3.8"
-version = "0.1.0"
+
+[tool.setuptools]
+packages = ["manifest_lint"]

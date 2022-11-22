@@ -1,3 +1,4 @@
+import sys
 
 class ManifestError:
     messages = []
@@ -36,9 +37,16 @@ class ManifestError:
     @staticmethod
     def pattern(filename: str):
         ManifestError.err(
-            filename, "YAML filename should follow pattern `[a-z]+(-[a-z0-9])+.yaml`")
+            filename, "YAML filename should follow pattern `[a-z]+(-[a-z0-9])+.(yaml|yml)$`")
 
     @staticmethod
     def display():
         for filename, reason in ManifestError.messages:
             print(f"::error file={filename}::{reason}")
+        
+    @staticmethod
+    def exit():
+        if len(ManifestError.messages) > 0:
+            sys.exit(1)
+        else:
+            sys.exit(0)
