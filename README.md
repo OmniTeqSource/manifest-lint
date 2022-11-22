@@ -32,8 +32,9 @@ spec: {}
 
 ## Example usage
 
-```
-uses: actions/manifest-lint@v1
-with:
-directory: 'test/'
+```yaml
+- name: Manifest Lint
+  uses: skyfjell/manifest-lint@0.1.0
+  with:
+    directory: "test/"
 ```

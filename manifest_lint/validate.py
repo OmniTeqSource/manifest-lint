@@ -122,7 +122,11 @@ def check_file(config: LintConfig, filename: str):
 def enforce(root_dir: str, **kwargs):
     """Enforces a directory"""
     config = LintConfig(**kwargs)
-    for (dirpath, _, filenames) in os.walk(root_dir):
+    for (dirpath, dirs, filenames) in os.walk(root_dir, topdown=True):
+        # skips hidden files
+        filenames = [f for f in filenames if not f[0] == '.']
+        dirs[:] = [d for d in dirs if not d[0] == '.']
+
         for filename in filenames:
             if filename.endswith(('.yml', '.yaml')):
                 if FNAME_PATTERN.match(filename) is None:
