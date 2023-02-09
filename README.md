@@ -34,7 +34,7 @@ spec: {}
 
 ```yaml
 - name: Manifest Lint
-  uses: skyfjell/manifest-lint@0.1.0
+  uses: skyfjell/manifest-lint@0.2.0
   with:
     directory: "test/"
 ```
