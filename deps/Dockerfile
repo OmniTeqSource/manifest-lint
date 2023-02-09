@@ -1,8 +1,5 @@
 FROM python:3.11 as builder
 
-RUN curl -L https://raw.githubusercontent.com/warrensbox/terraform-switcher/release/install.sh | bash
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
-
 WORKDIR /build
 
 COPY . .
@@ -14,18 +11,15 @@ RUN --mount=source=.git,target=.git,type=bind \
 
 FROM python:3.11
 
-RUN addgroup --system --gid 1001 ciuser
-RUN adduser --system --uid 1001 ciuser
+RUN addgroup --system --gid 1001 lintuser
+RUN adduser --system --uid 1001 lintuser
 
 WORKDIR /app
 
 COPY --from=builder /opt/venv /opt/venv
-COPY --from=builder /usr/local/bin/tfswitch /usr/bin/tfswitch
-ENV PATH="/opt/venv/bin:$PATH:/home/ciuser/bin"
-COPY --from=builder /build/main.sh /app/main.sh
-COPY --from=builder /build/templates /app/templates
+ENV PATH="/opt/venv/bin:$PATH"
 
-RUN chown -R ciuser:ciuser /app
+RUN chown -R lintuser:lintuser /app
 RUN chmod 755 /app
 
-USER ciuser
+USER lintuser
